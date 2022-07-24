@@ -1,0 +1,101 @@
+buildscript {
+    ext {
+        springBootVersion = '2.6.4'
+        queryDslVersion = "5.0.0"
+    }
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath "io.spring.gradle:dependency-management-plugin:1.0.11.RELEASE"
+        classpath "gradle.plugin.com.ewerk.gradle.plugins:querydsl-plugin:1.0.10"
+    }
+}
+
+
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'com.ewerk.gradle.plugins.querydsl'
+
+group 'org.example'
+sourceCompatibility = '11'
+
+//모든 모듈에서 프로퍼티 정의를 먼저 진행한다.
+project.evaluate()
+
+//gradle의 프로퍼티값들을 자바 리소스로 가져오기 전에 clean을 해줘서 강제 update 하기 위함.
+compileJava{
+    dependsOn clean
+}
+
+//application.yml 리소스 파일에 프로퍼티값 주입
+processResources {
+    filesMatching('**/application.yml') {
+        expand(project.properties)
+    }
+}
+
+//  jar 로 떨굴때 최상위 모듈의 build/ 디렉토리로
+bootJar{
+    destinationDirectory = file(rootProject.buildDir)
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies{
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+    implementation "org.springframework.boot:spring-boot-starter-batch"
+    implementation "org.springframework.boot:spring-boot-starter-quartz"
+
+    // QueryDSL
+    implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
+    implementation "com.querydsl:querydsl-sql:${queryDslVersion}"
+    implementation "com.querydsl:querydsl-apt:${queryDslVersion}"
+    // H2
+    implementation "com.h2database:h2:2.1.210"
+
+    compileOnly 'org.projectlombok:lombok'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+//querydsl 추가 시작
+def querydslDir = "$buildDir/generated/querydsl"
+
+querydsl {
+    library = "com.querydsl:querydsl-apt"
+    jpa = true
+    querydslSourcesDir = querydslDir
+}
+sourceSets {
+    main.java.srcDir querydslDir
+}
+compileQuerydsl{
+    options.annotationProcessorPath = configurations.querydsl
+}
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+    querydsl.extendsFrom compileClasspath
+}
