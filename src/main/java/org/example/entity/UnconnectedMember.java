@@ -16,7 +16,7 @@ import java.sql.Date;
 public class UnconnectedMember {
 
     @Id
-    @Column(name = "idx", columnDefinition = "int comment '회원 고유키'")
+    @Column(name = "idx", columnDefinition = "int(10) comment '회원 고유키'")
     private Integer idx;
 
     @Column(name = "email", columnDefinition = "varchar(100) not null comment '이메일'")

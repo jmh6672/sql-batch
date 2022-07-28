@@ -66,8 +66,8 @@ dependencies{
     implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
     implementation "com.querydsl:querydsl-sql:${queryDslVersion}"
     implementation "com.querydsl:querydsl-apt:${queryDslVersion}"
-    // H2
-    implementation "com.h2database:h2:2.1.210"
+    // mysql
+    implementation "mysql:mysql-connector-java:8.0.28"
 
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
